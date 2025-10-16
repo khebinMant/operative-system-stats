@@ -109,7 +109,7 @@ export default function ChartComponent({ data, selectedOS, chartType }: ChartCom
         max: 100,           // Máximo 100%
         ticks: {
           // Formato personalizado: agregar '%' a los valores
-          callback: function(value: any) {
+          callback: function(value: string | number) {
             return value + '%';
           }
         },
