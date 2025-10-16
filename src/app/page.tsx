@@ -1,103 +1,133 @@
-import Image from "next/image";
+/**
+ * DASHBOARD SISTEMAS OPERATIVOS
+ * 
+ * Proyecto desarrollado para mostrar la evolución histórica del porcentaje
+ * de usuarios de sistemas operativos desde 2001 hasta 2024.
+ * 
+ * Características principales:
+ * ✅ Visualización interactiva con Chart.js
+ * ✅ Selección múltiple de sistemas operativos (1-3)
+ * ✅ Gráficos de líneas y barras
+ * ✅ Estadísticas en tiempo real
+ * ✅ Diseño responsivo y accesible
+ * 
+ * Tecnologías utilizadas:
+ * - Next.js 15 con TypeScript
+ * - React 19 con hooks
+ * - Chart.js para visualizaciones
+ * - Tailwind CSS para estilos
+ * 
+ * @author Dashboard de Sistemas Operativos
+ * @version 1.0
+ */
+'use client';
+
+import React, { useState } from 'react';
+// Importación de componentes personalizados
+import ChartComponent from '@/components/ChartComponent';  // Componente principal del gráfico
+import Controls from '@/components/Controls';              // Controles de interacción
+import Stats from '@/components/Stats';                    // Estadísticas resumidas
+import { osData } from '@/data/osData';                   // Datos históricos
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  // Estado para controlar qué sistemas operativos están seleccionados
+  // Por defecto todos están activos para mostrar la evolución completa
+  const [selectedOS, setSelectedOS] = useState({
+    windows: true,   // Microsoft Windows
+    linux: true,     // Distribuciones Linux
+    macos: true,     // Apple macOS
+  });
+  
+  // Estado para el tipo de gráfico (líneas por defecto por mejor legibilidad)
+  const [chartType, setChartType] = useState<'line' | 'bar'>('line');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  /**
+   * Maneja el cambio de selección de sistemas operativos
+   * Permite activar/desactivar cualquier SO manteniendo los demás estados
+   * @param os - Clave del sistema operativo a cambiar
+   */
+  const handleOSChange = (os: keyof typeof selectedOS) => {
+    setSelectedOS(prev => ({
+      ...prev,
+      [os]: !prev[os]    // Invierte el estado actual del SO seleccionado
+    }));
+  };
+
+  /**
+   * Maneja el cambio de tipo de gráfico
+   * Actualiza la visualización entre líneas y barras
+   * @param type - Tipo de gráfico seleccionado
+   */
+  const handleChartTypeChange = (type: 'line' | 'bar') => {
+    setChartType(type);
+  };
+
+  // Verifica si al menos un sistema operativo está seleccionado
+  // Necesario para mostrar el gráfico o mensaje de selección
+  const hasSelectedOS = Object.values(selectedOS).some(selected => selected);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            📊 Dashboard Sistemas Operativos
+          </h1>
+          <p className="text-lg text-gray-600">
+            Evolución del porcentaje de usuarios de sistemas operativos (2001-2024)
+          </p>
+        </header>
+
+        {/* Controls */}
+        <Controls
+          selectedOS={selectedOS}
+          chartType={chartType}
+          onOSChange={handleOSChange}
+          onChartTypeChange={handleChartTypeChange}
+        />
+
+        {/* Stats */}
+        {hasSelectedOS && (
+          <Stats data={osData} selectedOS={selectedOS} />
+        )}
+
+        {/* Chart */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          {hasSelectedOS ? (
+            <ChartComponent
+              data={osData}
+              selectedOS={selectedOS}
+              chartType={chartType}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📈</div>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                Selecciona al menos un sistema operativo
+              </h3>
+              <p className="text-gray-500">
+                Usa los controles de arriba para elegir qué sistemas operativos mostrar en el gráfico.
+              </p>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Footer con información del proyecto */}
+        <footer className="text-center mt-8 p-4 bg-white rounded-lg shadow-sm">
+          <div className="text-gray-500 space-y-2">
+            <p className="font-medium">
+              📊 Dashboard Sistemas Operativos - Evolución 2001-2024
+            </p>
+            <p className="text-sm">
+              Desarrollado con ❤️ usando Next.js, React, TypeScript y Chart.js
+            </p>
+            <p className="text-xs text-gray-400">
+              Datos de ejemplo • Visualización interactiva • Diseño responsivo
+            </p>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
